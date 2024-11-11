@@ -5,8 +5,12 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+import com.spring.ai.eval.llm.service.ConfigProperties;
+
+@EnableConfigurationProperties(value = ConfigProperties.class)
 @SpringBootApplication
 public class EvalLlmModelsApplication {
 
