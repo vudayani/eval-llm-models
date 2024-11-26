@@ -1,4 +1,4 @@
-package com.spring.ai.eval;
+package com.spring.ai.eval.llm;
 
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.chat.client.ChatClient;
