@@ -30,9 +30,14 @@ public class LlmEvaluationService {
 
 	@Value("classpath:/output/expected_output.st")
 	private Resource expectedOutput;
-
-//	@Value("classpath:/prompts/spring-prompt.st")
-//	private Resource sbPromptTemplate;
+	
+	private String improvementPromptMessage = """
+			The following prompt did not meet the evaluation criteria:
+			User Prompt: %s\n
+			System Prompt: %s\n\n
+			Evaluation Criteria: \n%s\n\n
+			Please suggest improvements to both **user prompt** and the **system prompt** to better satisfy the evaluation criteria. Ensure the refined prompts are detailed, structured, and specific enough to guide the LLM in producing high-quality responses.
+			""";
 
 	public LlmEvaluationService(ChatClientFactory chatClientFactory, ConfigProperties props) {
 		this.chatClientFactory = chatClientFactory;
@@ -53,14 +58,16 @@ public class LlmEvaluationService {
 		PromptRequest promptRequest = new PromptRequest(promptTuningRequest.userPrompt(), promptTuningRequest.systemPrompt());
 		ChatResponse chatResp = getLlmModelResponse(promptRequest, model);
 		String llmResp = chatResp.getResult().getOutput().getContent();
-//		PromptMetadata metadata = chatResp.getMetadata().getPromptMetadata();
 		LlmEvaluationResponse evaluationResult = evaluateResponse(promptTuningRequest, llmResp);
 		
 		if (Double.parseDouble(evaluationResult.score()) < 0.7) {
 			PromptRequest improvementPromptRequest = new PromptRequest(
-	                "Suggest improvements for the following prompt: " + promptTuningRequest.userPrompt(),
-	                promptTuningRequest.systemPrompt()
-	        );
+					String.format(improvementPromptMessage, promptTuningRequest.userPrompt(),
+							promptTuningRequest.systemPrompt(),
+							String.join("\n", promptTuningRequest.evaluationCriteria())),
+			        "Use prompt engineering techniques to deliver improved prompts that guide the LLM to produce high-quality and relevant results that meet the evaluation criteria. Ensure the system prompt provides clear role guidance.");
+			System.out.println("improved prompt req " + improvementPromptRequest.toString());
+			
 	        String improvementSuggestion = getLlmModelResponse(
 	        		improvementPromptRequest, model)
 	                .getResult().getOutput().getContent();
@@ -81,12 +88,10 @@ public class LlmEvaluationService {
 	
 	public LlmEvaluationRequest buildEvalRequest(PromptTuningRequest promptTuningRequest, String llmResponse) {
 	    return new LlmEvaluationRequest(
-	        promptTuningRequest.userPrompt(),
+	        "User Prompt: "+  promptTuningRequest.userPrompt() +"\n System Prompt: " + promptTuningRequest.systemPrompt() ,
 	        llmResponse,
-	        promptTuningRequest.expectedOutput(),
 	        null,
-	        promptTuningRequest.evaluationSteps()
+	        promptTuningRequest.evaluationCriteria()
 	    );
 	}
-
 }

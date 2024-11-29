@@ -88,7 +88,7 @@ public class ChatController {
 		
 		if(promptTuningRequest == null) {
 			promptTuningRequest = new PromptTuningRequest("add jpa functionality",
-					sbPromptTemplate.getContentAsString(Charset.defaultCharset()), null, null);
+					sbPromptTemplate.getContentAsString(Charset.defaultCharset()), null);
 		}
 
 		return ResponseEntity.ok(llmEvaluationService.evaluateLLMResponse(promptTuningRequest, model));

@@ -1,5 +1,7 @@
 package com.spring.ai.eval.llm.dto;
 
-public record PromptTuningResult(String llmResponse, LlmEvaluationResponse evalResponse, String improvementSuggestion) {
+import com.fasterxml.jackson.annotation.JsonRawValue;
+
+public record PromptTuningResult(@JsonRawValue String llmResponse, LlmEvaluationResponse evalResponse, @JsonRawValue String improvementSuggestion) {
 
 }
